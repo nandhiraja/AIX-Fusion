@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIX Fusion - Text Summarization</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #5271FF;
+            --primary-hover: #3d5eff;
+            --bg-dark: #0f111a;
+            --bg-card: #1a1d2d;
+            --bg-input: #252a3d;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a8c7;
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            --border-radius: 14px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 10% 20%, rgba(50, 68, 158, 0.1) 0%, rgba(0, 0, 0, 0) 80%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 2rem 0;
+        }
+        
+        .logo-container {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .logo {
+            font-size: 3.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            letter-spacing: 0.5px;
+            font-weight: 400;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background: var(--bg-card);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-top: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        h2 {
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-align: center;
+            font-size: 1.5rem;
+        }
+        
+        .input-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem;
+            border-radius: 10px;
+            resize: none;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            letter-spacing: 0.3px;
+            line-height: 1.5;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(82, 113, 255, 0.2);
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+        
+        button:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(82, 113, 255, 0.3);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .upload-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 1rem;
+        }
+        
+        .upload-btn {
+            flex: 1;
+            background: var(--bg-input);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px;
+            gap: 10px;
+            font-size: 14px;
+            overflow: hidden;
+        }
+        
+        .upload-btn:hover {
+            color: var(--text-primary);
+            background-color: rgba(82, 113, 255, 0.1);
+            border-color: rgba(82, 113, 255, 0.3);
+        }
+        
+        .file-info {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .file-info.active {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid var(--primary-color);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .summary-container {
+            background: var(--bg-input);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .summary-title {
+            font-weight: 500;
+            font-size: 17px;
+            color: var(--text-primary);
+        }
+        
+        .summary-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-button {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 0;
+        }
+        
+        .action-button:hover {
+            background: rgba(82, 113, 255, 0.2);
+            color: var(--primary-color);
+            transform: translateY(0);
+            box-shadow: none;
+        }
+        
+        .summary-content {
+            line-height: 1.7;
+            color: var(--text-primary);
+            font-size: 15px;
+            letter-spacing: 0.3px;
+        }
+        
+        .format-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .format-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        
+        .format-button {
+            background: rgba(255, 255, 255, 0.06);
+            color: var(--text-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .format-button:hover {
+            background: rgba(82, 113, 255, 0.1);
+            color: var(--primary-color);
+            border-color: rgba(82, 113, 255, 0.3);
+        }
+        
+        .format-button.active {
+            background-color: rgba(82, 113, 255, 0.2);
+            color: var(--primary-color);
+            border-color: rgba(82, 113, 255, 0.4);
+        }
+        
+        .tooltip {
+            position: relative;
+        }
+        
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 120px;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -60px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+        
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 1.5rem;
+            }
+            
+            textarea {
+                height: 150px;
+            }
+            
+            .logo {
+                font-size: 2.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .upload-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="logo-container">
+        <div class="logo">AIX Fusion</div>
+        <div class="tagline">Advanced multi-source web intelligence</div>
+    </div>
+    
+    <div class="container">
+        <h2>Intelligent Text Summarization</h2>
+        
+        <div class="upload-container">
+            <label class="upload-btn" for="txt-file">
+                <i class="fas fa-file-alt"></i>
+                <span>Text File (.txt)</span>
+                <input type="file" id="txt-file" style="display: none;" accept=".txt">
+            </label>
+            
+            <label class="upload-btn" for="doc-file">
+                <i class="fas fa-file-word"></i>
+                <span>Word Document</span>
+                <input type="file" id="doc-file" style="display: none;" accept=".doc,.docx">
+            </label>
+            
+            <!-- <label class="upload-btn" for="pdf-file">
+                <i class="fas fa-file-pdf"></i>
+                <span>PDF Document</span>
+                <input type="file" id="pdf-file" style="display: none;" accept=".pdf">
+            </label> -->
+        </div>
+        
+        <div class="file-info" id="file-info">
+            <i class="fas fa-file"></i>
+            <span id="file-name"></span>
+        </div>
+        
+        <div class="input-container">
+            <textarea id="text-input" placeholder="Enter or paste your text here for AI-powered summarization..."></textarea>
+        </div>
+        
+        <div class="format-options">
+            <div>
+                <div class="format-label">Summary Length</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="format-button active" data-length="short">Short</button>
+                    <button class="format-button" data-length="medium">Medium</button>
+                    <button class="format-button" data-length="long">Long</button>
+                </div>
+            </div>
+            
+            <div>
+                <div class="format-label">Style</div>
+                <div style="display: flex; gap: 8px;">
+                    <button class="format-button active" data-style="concise">Concise</button>
+                    <button class="format-button" data-style="detailed">Detailed</button>
+                    <button class="format-button" data-style="bullets">Bullet Points</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="action-buttons">
+            <button onclick="summarizeText()">
+                <i class="fas fa-magic"></i> Generate Summary
+            </button>
+            <button onclick="clearText()" style="background-color: rgba(255,255,255,0.1); color: var(--text-secondary);">
+                <i class="fas fa-broom"></i> Clear All
+            </button>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Generating your summary...</p>
+        </div>
+        
+        <div class="summary-container" id="summary-container" style="display: none;">
+            <div class="summary-header">
+                <div class="summary-title">Summary Results</div>
+                <div class="summary-actions">
+                    <button class="action-button tooltip" onclick="copyToClipboard()">
+                        <i class="fas fa-copy"></i>
+                        <span class="tooltiptext">Copy to clipboard</span>
+                    </button>
+                    <button class="action-button tooltip" onclick="downloadSummary()">
+                        <i class="fas fa-download"></i>
+                        <span class="tooltiptext">Download summary</span>
+                    </button>
+                    <button class="action-button tooltip" onclick="shareSummary()">
+                        <i class="fas fa-share-alt"></i>
+                        <span class="tooltiptext">Share summary</span>
+                    </button>
+                </div>
+            </div>
+            <div class="summary-content" id="summary"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Track current settings
+        let summarySettings = {
+            length: "short",
+            style: "concise"
+        };
+        
+        // Set up event listeners for file inputs
+        document.getElementById("txt-file").addEventListener("change", handleFileUpload);
+        document.getElementById("doc-file").addEventListener("change", handleFileUpload);
+        // document.getElementById("pdf-file").addEventListener("change", handleFileUpload);
+        
+        // Handle format button clicks
+        document.querySelectorAll('.format-button[data-length]').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons in this group
+                document.querySelectorAll('.format-button[data-length]').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                // Add active class to clicked button
+                this.classList.add('active');
+                // Update settings
+                summarySettings.length = this.getAttribute('data-length');
+            });
+        });
+        
+        document.querySelectorAll('.format-button[data-style]').forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons in this group
+                document.querySelectorAll('.format-button[data-style]').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                // Add active class to clicked button
+                this.classList.add('active');
+                // Update settings
+                summarySettings.style = this.getAttribute('data-style');
+            });
+        });
+        
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const fileInfo = document.getElementById("file-info");
+                const fileName = document.getElementById("file-name");
+                
+                fileName.textContent = `${file.name} (${formatFileSize(file.size)})`;
+                fileInfo.classList.add("active");
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById("text-input").value = e.target.result;
+                };
+                reader.onerror = function() {
+                    fileName.textContent = "Error reading file";
+                };
+                reader.readAsText(file);
+            }
+        }
+        
+        async function summarizeText() {
+            const textInput = document.getElementById("text-input").value;
+            if (!textInput.trim()) {
+                alert("Please enter some text to summarize.");
+                return;
+            }
+            
+            // Show loading animation
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("summary-container").style.display = "none";
+            
+            try {
+                const response = await fetch("http://127.0.0.1:5000/summarize_text", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ 
+                        content: textInput,
+                        length: summarySettings.length,
+                        style: summarySettings.style
+                    })
+                });
+                
+                const result = await response.json();
+                
+                // Hide loading animation
+                document.getElementById("loading").style.display = "none";
+                
+                // Display summary
+                let summaryContent = result.summary || "Error generating summary.";
+                
+                // Format as bullets if that style is selected
+                if (summarySettings.style === "bullets" && result.summary) {
+                    const sentences = result.summary.split('. ').filter(s => s.trim() !== '');
+                    summaryContent = sentences.map(s => `• ${s}`).join('<br>');
+                }
+                
+                document.getElementById("summary").innerHTML = summaryContent;
+                document.getElementById("summary-container").style.display = "block";
+            } catch (error) {
+                document.getElementById("loading").style.display = "none";
+                document.getElementById("summary").innerHTML = "Error connecting to the server. Please try again later.";
+                document.getElementById("summary-container").style.display = "block";
+            }
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + " bytes";
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
+            else return (bytes / 1048576).toFixed(1) + " MB";
+        }
+        
+        function clearText() {
+            document.getElementById("text-input").value = "";
+            document.getElementById("file-info").classList.remove("active");
+            document.getElementById("file-name").textContent = "";
+            document.getElementById("summary-container").style.display = "none";
+            document.getElementById("txt-file").value = "";
+            document.getElementById("doc-file").value = "";
+            document.getElementById("pdf-file").value = "";
+        }
+        
+        function copyToClipboard() {
+            const summaryText = document.getElementById("summary").innerText;
+            navigator.clipboard.writeText(summaryText)
+                .then(() => {
+                    showToast("Summary copied to clipboard");
+                })
+                .catch(err => {
+                    console.error('Failed to copy text: ', err);
+                });
+        }
+        
+        function downloadSummary() {
+            const summaryText = document.getElementById("summary").innerText;
+            const blob = new Blob([summaryText], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'summary.txt';
+            document.body.appendChild(a);
+            a.click();
+            
+            // Clean up
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast("Summary downloaded");
+        }
+        
+        function shareSummary() {
+            const summaryText = document.getElementById("summary").innerText;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'AIX Fusion Summary',
+                    text: summaryText
+                })
+                .catch(err => {
+                    console.error('Share failed:', err);
+                });
+            } else {
+                copyToClipboard();
+                showToast("Summary copied to clipboard for sharing");
+            }
+        }
+        
+        function showToast(message) {
+            // Check if a toast container already exists
+            let toast = document.querySelector('.toast');
+            if (toast) {
+                document.body.removeChild(toast);
+            }
+            
+            // Create new toast
+            toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            toast.style.position = 'fixed';
+            toast.style.bottom = '20px';
+            toast.style.left = '50%';
+            toast.style.transform = 'translateX(-50%)';
+            toast.style.backgroundColor = 'rgba(0,0,0,0.8)';
+            toast.style.color = 'white';
+            toast.style.padding = '10px 20px';
+            toast.style.borderRadius = '8px';
+            toast.style.zIndex = '1000';
+            toast.style.opacity = '0';
+            toast.style.transition = 'opacity 0.3s ease';
+            
+            document.body.appendChild(toast);
+            
+            // Show toast
+            setTimeout(() => { toast.style.opacity = '1'; }, 10);
+            
+            // Hide toast after 3 seconds
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    document.body.removeChild(toast);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

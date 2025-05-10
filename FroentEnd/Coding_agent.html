@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIX Fusion - AI Code Generator</title>
+  <!-- Prism.js CSS (Light Theme) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --dark-bg: #0A1018;
+      --darker-bg: #111827;
+      --border-color: #1A2234;
+      --text-color: #E6EDF3;
+      --primary-color: #1F6FEB;
+      --primary-hover: #388BFD;             
+      --secondary-color: #2EA043;
+      --heading-color: #58A6FF;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: var(--dark-bg);
+      color: var(--text-color);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      text-align: center;
+      padding: 20px 0;
+      border-bottom: 1px solid var(--border-color);
+      margin-bottom: 30px;
+    }
+    
+    header h1 {
+      font-size: 2.5rem;
+      color: var(--heading-color);
+      margin-bottom: 10px;
+    }
+    
+    header p {
+      font-size: 1.1rem;
+      opacity: 0.8;
+    }
+    
+    .prompt-section {
+      margin-bottom: 30px;
+    }
+    
+    .prompt-input {
+      width: 100%;
+      background-color: var(--darker-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-color);
+      padding: 15px;
+      border-radius: 6px;
+      font-size: 1rem;
+      resize: vertical;
+      min-height: 100px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+    
+    .prompt-input:focus {
+      border-color: var(--primary-color);
+    }
+    
+    .button-container {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 15px;
+    }
+    
+    .generate-btn {
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.3s;
+    }
+    
+    .generate-btn:hover {
+      background-color: var(--primary-hover);
+    }
+    
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 30px 0;
+    }
+    
+    .loading .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-left-color: var(--primary-color);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+    
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    
+    .result-section {
+      display: none;
+      margin-top: 30px;
+    }
+    
+    .code-container {
+      background-color: var(--darker-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    
+    .code-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 15px;
+      background-color: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid var(--border-color);
+    }
+    
+    .file-info {
+      font-size: 0.9rem;
+      color: #8B949E;
+    }
+    
+    .code-actions {
+      display: flex;
+      gap: 15px;
+    }
+    
+    .action-btn {
+      background: none;
+      border: none;
+      color: #8B949E;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.9rem;
+      transition: color 0.3s;
+    }
+    
+    .action-btn:hover {
+      color: var(--text-color);
+    }
+    
+    .code-content {
+      position: relative;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+    
+    .code-content pre {
+      margin: 0 !important;
+      border-radius: 0 !important;
+      background-color: transparent !important;
+    }
+    
+    .code-content code {
+      font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 0.9rem;
+    }
+    
+    .copy-success {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      display: none;
+      z-index: 10;
+    }
+    
+    /* Custom dark theme for Prism.js */
+    .code-content pre {
+      background-color: var(--darker-bg) !important;
+    }
+    
+    .code-content code {
+      background-color: var(--darker-bg) !important;
+      color: #c9d1d9 !important;
+    }
+    
+    .token.comment,
+    .token.prolog,
+    .token.doctype,
+    .token.cdata {
+      color: #8b949e !important;
+    }
+    
+    .token.punctuation {
+      color: #c9d1d9 !important;
+    }
+    
+    .token.property,
+    .token.tag,
+    .token.boolean,
+    .token.number,
+    .token.constant,
+    .token.symbol,
+    .token.deleted {
+      color: #79c0ff !important;
+    }
+    
+    .token.selector,
+    .token.attr-name,
+    .token.string,
+    .token.char,
+    .token.builtin,
+    .token.inserted {
+      color: #a5d6ff !important;
+    }
+    
+    .token.operator,
+    .token.entity,
+    .token.url,
+    .language-css .token.string,
+    .style .token.string {
+      color: #d2a8ff !important;
+    }
+    
+    .token.atrule,
+    .token.attr-value,
+    .token.keyword {
+      color: #ff7b72 !important;
+    }
+    
+    .token.function,
+    .token.class-name {
+      color: #d2a8ff !important;
+    }
+    
+    .token.regex,
+    .token.important,
+    .token.variable {
+      color: #ffa657 !important;
+    }
+    
+    /* Code scrollbar styling */
+    .code-content::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    
+    .code-content::-webkit-scrollbar-track {
+      background: var(--darker-bg);
+    }
+    
+    .code-content::-webkit-scrollbar-thumb {
+      background: var(--border-color);
+      border-radius: 10px;
+    }
+    
+    .code-content::-webkit-scrollbar-thumb:hover {
+      background: #3f4448;
+    }
+    
+    /* Responsive styles */
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 2rem;
+      }
+      
+      .prompt-input {
+        min-height: 80px;
+        padding: 12px;
+      }
+      
+      .code-content {
+        max-height: 350px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>AIX Fusion</h1>
+      <p>Advanced AI Code Generation</p>
+    </header>
+    
+    <div class="prompt-section">
+      <textarea class="prompt-input" placeholder="Describe the code you need (e.g. 'Create a React component for a responsive navigation bar')"></textarea>
+      <div class="button-container">
+        <button class="generate-btn" id="generateBtn">
+          <i class="fas fa-code"></i>
+          Generate Code
+        </button>
+      </div>
+    </div>
+    
+    <div class="loading" id="loadingIndicator">
+      <div class="spinner"></div>
+      <p>Generating your code...</p>
+    </div>
+    
+    <div class="result-section" id="resultSection">
+      <div class="code-container">
+        <div class="code-header">
+          <div class="file-info">
+            <span id="fileType">javascript</span>
+          </div>
+          <div class="code-actions">
+            <button class="action-btn" id="copyBtn">
+              <i class="fas fa-copy"></i>
+              Copy
+            </button>
+            <button class="action-btn" id="editBtn">
+              <i class="fas fa-pencil-alt"></i>
+              Edit
+            </button>
+          </div>
+        </div>
+        <div class="code-content">
+          <pre><code class="language-javascript" id="codeOutput"></code></pre>
+          <div class="copy-success" id="copySuccess">Copied!</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Prism.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-jsx.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-html.min.js"></script>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const generateBtn = document.getElementById('generateBtn');
+      const promptInput = document.querySelector('.prompt-input');
+      const loadingIndicator = document.getElementById('loadingIndicator');
+      const resultSection = document.getElementById('resultSection');
+      const codeOutput = document.getElementById('codeOutput');
+      const fileType = document.getElementById('fileType');
+      const copyBtn = document.getElementById('copyBtn');
+      const editBtn = document.getElementById('editBtn');
+      const copySuccess = document.getElementById('copySuccess');
+      
+      // API endpoint URL - Update this to match your FastAPI server address
+      const API_URL = 'http://localhost:5000/generate_code';
+      
+      // Event Listeners
+      generateBtn.addEventListener('click', handleGenerateCode);
+      copyBtn.addEventListener('click', handleCopyCode);
+      editBtn.addEventListener('click', handleEditCode);
+      
+      // Handle code generation
+      async function handleGenerateCode() {
+        const prompt = promptInput.value.trim();
+        
+        if (!prompt) {
+          alert('Please enter a description of the code you need.');
+          return;
+        }
+        
+        // Show loading indicator
+        loadingIndicator.style.display = 'block';
+        resultSection.style.display = 'none';
+        
+        try {
+          // Make API call to the FastAPI backend
+          const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ input: prompt }),
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Failed to generate code: ${response.status} ${response.statusText}`);
+          }
+          
+          const data = await response.json();
+          
+          if (!data.code || data.code.trim() === '') {
+            throw new Error('No code was generated. Please try a different prompt.');
+          }
+          
+          // Determine language based on code content or prompt
+          const language = determineLanguage(data.code, prompt);
+          
+          // Update UI with the response
+          displayGeneratedCode(language, data.code);
+          
+          // Show result section
+          resultSection.style.display = 'block';
+        } catch (error) {
+          console.error('Error:', error);
+          alert(error.message || 'An error occurred while generating code');
+        } finally {
+          // Hide loading indicator
+          loadingIndicator.style.display = 'none';
+        }
+      }
+      
+      // Determine programming language from code or prompt
+      function determineLanguage(code, prompt) {
+        // Basic language detection based on code content
+        if (code.includes('import React') || code.includes('React.') || 
+            code.includes('function(') || code.includes('=>') || 
+            code.includes('className=') || code.includes('export default') ||
+            (code.includes('function') && code.includes('return') && code.includes('{'))) {
+          return 'jsx';
+        } else if (code.includes('def ') || code.includes('import ') && code.includes(':')) {
+          return 'python';
+        } else if (code.includes('public class') || code.includes('public static void main')) {
+          return 'java';
+        } else if (code.includes('<html>') || code.includes('<!DOCTYPE html>')) {
+          return 'html';
+        } else if (code.includes('{') && code.includes('}') && 
+                 (code.includes('.class') || code.includes('#id') || code.includes('font-') || code.includes('background-'))) {
+          return 'css';
+        } else if (code.includes('function') && code.includes('{') && code.includes('}')) {
+          return 'javascript';
+        }
+        
+        // Fallback to prompt-based detection
+        const promptLower = prompt.toLowerCase();
+        if (promptLower.includes('react') || promptLower.includes('jsx')) {
+          return 'jsx';
+        } else if (promptLower.includes('javascript') || promptLower.includes('js') || 
+                  promptLower.includes('node')) {
+          return 'javascript';
+        } else if (promptLower.includes('python')) {
+          return 'python';
+        } else if (promptLower.includes('java') && !promptLower.includes('javascript')) {
+          return 'java';
+        } else if (promptLower.includes('html')) {
+          return 'html';
+        } else if (promptLower.includes('css')) {
+          return 'css';
+        }
+        
+        // Default fallback
+        return 'javascript';
+      }
+      
+      // Display generated code
+      function displayGeneratedCode(language, code) {
+        // Update file type display
+        fileType.textContent = language;
+        
+        // Update code display with proper language class
+        codeOutput.className = `language-${language}`;
+        codeOutput.textContent = code;
+        
+        // Apply syntax highlighting
+        Prism.highlightElement(codeOutput);
+      }
+      
+      // Handle copy code
+      function handleCopyCode() {
+        const codeToCopy = codeOutput.textContent;
+        
+        navigator.clipboard.writeText(codeToCopy)
+          .then(() => {
+            // Show success message
+            copySuccess.style.display = 'block';
+            setTimeout(() => {
+              copySuccess.style.display = 'none';
+            }, 2000);
+          })
+          .catch(err => {
+            console.error('Failed to copy code: ', err);
+            alert('Failed to copy code to clipboard');
+          });
+      }
+      
+      // Handle edit code - opens the code in the prompt for editing
+      function handleEditCode() {
+        const currentCode = codeOutput.textContent;
+        const currentPrompt = promptInput.value.trim();
+        
+        // Prepare a new prompt that includes both the original request and the code
+        promptInput.value = `Improve or fix this code:\n\nOriginal request: ${currentPrompt}\n\nCurrent code:\n${currentCode}`;
+        
+        // Scroll to prompt area
+        promptInput.scrollIntoView({ behavior: 'smooth' });
+        promptInput.focus();
+      }
+    });
+  </script>
+</body>
+</html>

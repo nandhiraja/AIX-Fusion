@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIX Fusion - OCR Service</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0A1018;
+            --bg-medium: #111827;
+            --bg-light: #1A2234;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent: #3498db;
+            --accent-hover: #2980b9;
+            --success: #2ecc71;
+            --success-hover: #27ae60;
+            --border: #2c3038;
+            --shadow: rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', 'Arial', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.5;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        .navbar {
+            background-color: var(--bg-medium);
+            box-shadow: 0 2px 4px var(--shadow);
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        .container {
+            background: var(--bg-medium);
+            border-radius: 12px;
+            box-shadow: 0 4px 6px var(--shadow);
+            width: 100%;
+            max-width: 600px;
+            overflow: hidden;
+        }
+        
+        .card-header {
+            background-color: var(--bg-light);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-subtitle {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+        
+        .card-body {
+            padding: 2rem;
+        }
+        
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+        
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--accent);
+            background-color: rgba(52, 152, 219, 0.1);
+        }
+        
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-text {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+        }
+        
+        .upload-subtext {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+        
+        .upload-button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .upload-button:hover {
+            background-color: var(--accent-hover);
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .file-info {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-light);
+            padding: 0.75rem;
+            border-radius: 6px;
+            margin-bottom: 1.5rem;
+            display: none;
+        }
+        
+        .file-icon {
+            background-color: var(--bg-medium);
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin-right: 1rem;
+            color: var(--accent);
+        }
+        
+        .file-details {
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .file-size {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        .file-remove {
+            color: #e74c3c;
+            cursor: pointer;
+            padding: 0.25rem;
+        }
+        
+        .process-button {
+            display: block;
+            width: 100%;
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 0.75rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .process-button:hover {
+            background-color: var(--success-hover);
+        }
+        
+        .process-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .result-container {
+            margin-top: 2rem;
+            display: none;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+        
+        .result-title {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+        
+        .copy-button {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+        
+        .result-content {
+            background-color: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            font-size: 0.875rem;
+            line-height: 1.7;
+        }
+        
+        .loading-container {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .loading-spinner {
+            margin-bottom: 1rem;
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(52, 152, 219, 0.2);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        .loading-text {
+            color: var(--text-secondary);
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--success);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            box-shadow: 0 4px 6px var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transform: translateY(-100px);
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast-error {
+            background-color: #e74c3c;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            background-color: var(--bg-medium);
+            border-top: 1px solid var(--border);
+        }
+        
+        @media (max-width: 640px) {
+            .card-body, .card-header {
+                padding: 1rem;
+            }
+            
+            .upload-area {
+                padding: 1rem;
+            }
+            
+            .upload-icon {
+                font-size: 2rem;
+            }
+        }
+
+        /* Custom scrollbar for Webkit browsers */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-medium);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--border);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <div class="logo">
+            <i class="fas fa-eye"></i>
+            AIX Fusion
+        </div>
+    </div>
+    
+    <div class="main-content">
+        <div class="container">
+            <div class="card-header">
+                <h1 class="card-title">Optical Character Recognition</h1>
+                <p class="card-subtitle">Extract text from images with our state-of-the-art OCR technology</p>
+            </div>
+            
+            <div class="card-body">
+                <div id="uploadArea" class="upload-area">
+                    <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                    <p class="upload-text">Drag & drop your image here</p>
+                    <p class="upload-subtext">Supports JPG, PNG and PDF files up to 10MB</p>
+                    <button class="upload-button">Browse Files</button>
+                </div>
+                
+                <div id="fileInfo" class="file-info">
+                    <div class="file-icon">
+                        <i class="fas fa-file-image"></i>
+                    </div>
+                    <div class="file-details">
+                        <div id="fileName" class="file-name">image.jpg</div>
+                        <div id="fileSize" class="file-size">1.2 MB</div>
+                    </div>
+                    <div id="fileRemove" class="file-remove">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+                
+                <button id="processButton" class="process-button" disabled>
+                    <i class="fas fa-magic"></i>
+                    Extract Text
+                </button>
+                
+                <div id="loadingContainer" class="loading-container">
+                    <div class="loading-spinner"></div>
+                    <p class="loading-text">Processing your image...</p>
+                </div>
+                
+                <div id="resultContainer" class="result-container">
+                    <div class="result-header">
+                        <div class="result-title">Extracted Text</div>
+                        <button id="copyButton" class="copy-button">
+                            <i class="far fa-copy"></i>
+                            Copy
+                        </button>
+                    </div>
+                    <div id="resultContent" class="result-content"></div>
+                </div>
+                
+                <input type="file" id="imageInput" accept="image/*,.pdf">
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        &copy; 2025 AIX Fusion. All rights reserved.
+    </div>
+    
+    <div id="toast" class="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Text copied to clipboard!</span>
+    </div>
+    
+    <script>
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const imageInput = document.getElementById('imageInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const fileRemove = document.getElementById('fileRemove');
+        const processButton = document.getElementById('processButton');
+        const loadingContainer = document.getElementById('loadingContainer');
+        const resultContainer = document.getElementById('resultContainer');
+        const resultContent = document.getElementById('resultContent');
+        const copyButton = document.getElementById('copyButton');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        
+        // File upload handling
+        uploadArea.addEventListener('click', () => {
+            imageInput.click();
+        });
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length) {
+                handleFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        imageInput.addEventListener('change', () => {
+            if (imageInput.files.length) {
+                handleFile(imageInput.files[0]);
+            }
+        });
+        
+        fileRemove.addEventListener('click', () => {
+            resetFileUpload();
+        });
+        
+        function handleFile(file) {
+            // Check file type and size
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+            const maxSize = 10 * 1024 * 1024; // 10MB
+            
+            if (!validTypes.includes(file.type)) {
+                showToast('Please upload an image or PDF file.', true);
+                return;
+            }
+            
+            if (file.size > maxSize) {
+                showToast('File is too large. Maximum size is 10MB.', true);
+                return;
+            }
+            
+            // Display file info
+            fileName.textContent = file.name;
+            fileSize.textContent = formatFileSize(file.size);
+            fileInfo.style.display = 'flex';
+            processButton.disabled = false;
+            
+            // Hide results if previously shown
+            resultContainer.style.display = 'none';
+        }
+        
+        function resetFileUpload() {
+            imageInput.value = '';
+            fileInfo.style.display = 'none';
+            processButton.disabled = true;
+        }
+        
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            else return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+        
+        // Process image
+        processButton.addEventListener('click', async () => {
+            if (!imageInput.files.length) return;
+            
+            const file = imageInput.files[0];
+            
+            // Show loading state
+            loadingContainer.style.display = 'flex';
+            processButton.disabled = true;
+            uploadArea.style.display = 'none';
+            fileInfo.style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append("file", file);
+            
+            try {
+                const response = await fetch("http://127.0.0.1:5000/ocr/", {
+                    method: "POST",
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Server error');
+                }
+                
+                const data = await response.json();
+                
+                // Display results
+                loadingContainer.style.display = 'none';
+                resultContainer.style.display = 'block';
+                
+                if (data.extracted_text && data.extracted_text.length > 0) {
+                    resultContent.innerText = data.extracted_text.join('\n');
+                } else {
+                    resultContent.innerText = "No text was detected in this image.";
+                }
+                
+                // Reset button state
+                processButton.disabled = false;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                loadingContainer.style.display = 'none';
+                showToast('Error processing the image. Please try again.', true);
+                
+                // Reset UI
+                uploadArea.style.display = 'block';
+                fileInfo.style.display = 'flex';
+                processButton.disabled = false;
+            }
+        });
+        
+        // Copy text functionality
+        copyButton.addEventListener('click', () => {
+            const text = resultContent.innerText;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast('Text copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy text.', true);
+            });
+        });
+        
+        // Toast notification
+        function showToast(message, isError = false) {
+            toastMessage.textContent = message;
+            
+            if (isError) {
+                toast.classList.add('toast-error');
+            } else {
+                toast.classList.remove('toast-error');
+            }
+            
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIX Fusion - AI Video Generator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0A1018;
+            --bg-secondary: #111827;
+            --bg-tertiary: #1A2234;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0a0;
+            --accent-color: #3498db;
+            --accent-hover: #2980b9;
+            --success-color: #2ecc71;
+            --success-hover: #27ae60;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Arial', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        .header {
+            background-color: var(--bg-secondary);
+            padding: 20px 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .header-logo {
+            margin-right: 15px;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            font-weight: 600;
+            color: var(--accent-color);
+        }
+
+        .video-generator {
+            background-color: var(--bg-tertiary);
+            border-radius: 12px;
+            padding: 40px;
+            margin: 30px 0;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .video-generator-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .video-generator-header h2 {
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .video-generator-header p {
+            color: var(--text-secondary);
+        }
+
+        .prompt-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        #prompt {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        #prompt:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .generate-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .generate-btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--text-secondary);
+        }
+
+        .video-output {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 30px;
+        }
+
+        #generatedVideo {
+            width: 100%;
+            max-width: 800px;
+            max-height: 500px;
+            display: none;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.2);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .download-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .download-btn:hover {
+            background-color: var(--success-hover);
+            transform: translateY(-2px);
+        }
+
+        .download-btn:active {
+            transform: translateY(0);
+        }
+
+        @media (max-width: 768px) {
+            .prompt-section {
+                flex-direction: column;
+            }
+
+            .generate-btn, .download-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="container header-content">
+            <div class="header-logo">
+                <i class="fas fa-video" style="color: var(--accent-color); font-size: 2.5rem;"></i>
+            </div>
+            <h1>AIX Fusion</h1>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="video-generator">
+            <div class="video-generator-header">
+                <h2>Generate AI Videos</h2>
+                <p>Describe your vision, and let AI transform it into a captivating video</p>
+            </div>
+
+            <div class="prompt-section">
+                <input 
+                    type="text" 
+                    id="prompt" 
+                    placeholder="Describe the scene you want to bring to life..."
+                >
+                <button 
+                    class="generate-btn" 
+                    onclick="generateVideo()"
+                >
+                    <i class="fas fa-magic"></i> Generate Video
+                </button>
+            </div>
+
+            <div class="loading" id="loadingIndicator">
+                <i class="fas fa-spinner fa-spin"></i> Generating video... Please wait
+            </div>
+
+            <div class="video-output">
+                <video id="generatedVideo" controls></video>
+                <div class="action-buttons">
+                    <button 
+                        id="downloadBtn" 
+                        class="download-btn" 
+                        onclick="downloadVideo()"
+                    >
+                        <i class="fas fa-download"></i> Download Video
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let generatedVideoUrl = null;
+
+        async function generateVideo() {
+            const prompt = document.getElementById('prompt').value;
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const generatedVideo = document.getElementById('generatedVideo');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            if (prompt.trim() === "") {
+                alert("Please enter a description for your video.");
+                return;
+            }
+
+            loadingIndicator.style.display = 'block';
+            generatedVideo.style.display = 'none';
+            downloadBtn.style.display = 'none';
+
+            try {
+                const response = await fetch('http://localhost:5000/generate_video/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                if (!response.ok) throw new Error('Video generation failed');
+
+                const videoBlob = await response.blob();
+                generatedVideoUrl = URL.createObjectURL(videoBlob);
+                generatedVideo.src = generatedVideoUrl;
+                generatedVideo.style.display = 'block';
+                downloadBtn.style.display = 'flex';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate video. Please try again.');
+            } finally {
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        function downloadVideo() {
+            if (!generatedVideoUrl) {
+                alert('No video to download. Please generate a video first.');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.href = generatedVideoUrl;
+            link.download = 'aix-fusion-video.mp4';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIX Fusion - AI Image Generator</title>
+    <style>
+        :root {
+            --bg-primary: #0A1018;
+            --bg-secondary: #111827;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --accent-color: #007bff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 15px;
+        }
+
+        header {
+            background-color: var(--bg-secondary);
+            padding: 20px 0;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            color: var(--text-primary);
+        }
+
+        .generator-section {
+            background-color: var(--bg-secondary);
+            border-radius: 10px;
+            padding: 30px;
+            margin: 30px 0;
+            text-align: center;
+        }
+
+        .prompt-container {
+            display: flex;
+            margin: 20px 0;
+            gap: 10px;
+        }
+
+        #prompt {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background-color: #111827;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .generate-btn {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+
+        .generate-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+            color: var(--text-secondary);
+        }
+
+        .generated-image-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+
+        #generatedImage {
+            max-width: 80%;
+            max-height: 500px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .download-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            display: none;
+        }
+
+        .download-btn:hover {
+            background-color: #218838;
+        }
+
+        .image-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .image-wrapper {
+            width: 300px;
+            background-color: var(--bg-secondary);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .image-wrapper:hover {
+            transform: scale(1.05);
+        }
+
+        .image-wrapper div:first-child {
+            width: 100%;
+            height: 250px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .image-description {
+            padding: 15px;
+            text-align: center;
+        }
+
+        .image-description h4 {
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+
+        .image-description p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <main class="container">
+        <section class="generator-section">
+            <h2>AI Image Generator</h2>
+            <p>Create stunning visuals with just a description</p>
+            
+            <div class="prompt-container">
+                <input 
+                    type="text" 
+                    id="prompt" 
+                    placeholder="Describe the image you want to generate..."
+                >
+                <button 
+                    class="generate-btn" 
+                    onclick="generateImage()"
+                >
+                    Generate
+                </button>
+            </div>
+
+            <div class="loading" id="loadingIndicator">
+                Generating image... Please wait.
+            </div>
+
+            <div class="generated-image-container">
+                <img id="generatedImage" style="display: none;" alt="Generated Image">
+                <button id="downloadBtn" class="download-btn" onclick="downloadImage()">
+                    Download Image
+                </button>
+            </div>
+        </section>
+
+        <section class="image-gallery">
+            <div class="image-wrapper">
+                <div style="background-image: url('https://pixlr.com/images/generator/photo-generator.webp')"></div>
+                <div class="image-description">
+                    <h4>Cyberpunk Warrior</h4>
+                    <p>A high-tech hero with neon augmentations</p>
+                </div>
+            </div>
+
+            <div class="image-wrapper">
+                <div style="background-image: url('https://img-cdn.pixlr.com/image-generator/history/65bb506dcb310754719cf81f/ede935de-1138-4f66-8ed7-44bd16efc709/medium.webp')"></div>
+                <div class="image-description">
+                    <h4>Ethereal Feline</h4>
+                    <p>A mystical cat with magical aura</p>
+                </div>
+            </div>
+
+            <div class="image-wrapper">
+                <div style="background-image: url('https://www.socialnative.com/wp-content/uploads/2024/01/What-social-platforms-are-doing-about-AI-generated-creator-content.png')"></div>
+                <div class="image-description">
+                    <h4>Animated Girl</h4>
+                    <p>A stylish character with a blend of realism and animation</p>
+                </div>
+            </div>
+            <div class="image-wrapper">
+                <div style="background-image: url('https://pixlr.com/images/generator/image-editor.webp')"></div>
+                <div class="image-description">
+                    <h4>Polish Your Vision With AIX Fusion</h4>
+                    <p>A retro camera glowing in a vibrant bokeh background</p>
+                </div>
+            </div>
+            <div class="image-wrapper">
+                <div style="background-image: url('https://img-cdn.pixlr.com/image-generator/history/65772796905f29530816ea40/4ca9ba3d-c418-4153-a36a-77f4182236a7/medium.webp')"></div>
+                <div class="image-description">
+                    <h4>Mechanical Guardian</h4>
+                    <p>A battle-worn robot from a post-apocalyptic world</p>
+                </div>
+            </div>
+
+            <div class="image-wrapper">
+                <div style="background-image: url('https://img-cdn.pixlr.com/image-generator/history/6565c8dff9ef18d69df3e3a2/fe1887b5-015e-4421-8c6a-1364d2f5b1e9/medium.webp')"></div>
+                <div class="image-description">
+                    <h4>Corporate Rhino</h4>
+                    <p>Sophisticated rhino in a tailored suit</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        let generatedImageUrl = null;
+
+        async function generateImage() {
+            const prompt = document.getElementById('prompt').value;
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            const generatedImage = document.getElementById('generatedImage');
+            const downloadBtn = document.getElementById('downloadBtn');
+
+            // Validate prompt
+            if (prompt.trim() === "") {
+                alert("Please enter a description for your image.");
+                return;
+            }
+
+            // Show loading, hide previous image and download button
+            loadingIndicator.style.display = 'block';
+            generatedImage.style.display = 'none';
+            downloadBtn.style.display = 'none';
+
+            try {
+                // Send request to backend
+                const response = await fetch('http://localhost:5000/generate-image', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ prompt: prompt })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Image generation failed');
+                }
+
+                // Get image blob
+                const imageBlob = await response.blob();
+                
+                // Create image URL
+                generatedImageUrl = URL.createObjectURL(imageBlob);
+                
+                // Display the generated image
+                generatedImage.src = generatedImageUrl;
+                generatedImage.style.display = 'block';
+                
+                // Show download button
+                downloadBtn.style.display = 'block';
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Failed to generate image. Please try again.');
+            } finally {
+                // Hide loading indicator
+                loadingIndicator.style.display = 'none';
+            }
+        }
+
+        function downloadImage() {
+            if (!generatedImageUrl) {
+                alert('No image to download. Please generate an image first.');
+                return;
+            }
+
+            // Create a temporary anchor element to trigger download
+            const link = document.createElement('a');
+            link.href = generatedImageUrl;
+            link.download = 'generated-image.png';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+</html>

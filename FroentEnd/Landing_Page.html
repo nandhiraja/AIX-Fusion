@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIX Fusion - Professional AI Platform</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-bg: #0A1018;
+            --secondary-bg: #111827;
+            --tertiary-bg: #1A2234;
+            --accent-blue: #3B82F6;
+            --light-blue: #60A5FA;
+            --text-primary: #F9FAFB;
+            --text-secondary: #D1D5DB;
+            --text-muted: #9CA3AF;
+            --border-color: #1F2A3C;
+            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+        }
+
+        body {
+            background-color: var(--primary-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Header Styles */
+        header {
+            background-color: rgba(10, 16, 24, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            padding: 1rem 0;
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo span {
+            background: linear-gradient(135deg, var(--accent-blue), var(--light-blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-left: 0.5rem;
+        }
+
+        .logo-icon {
+            font-size: 1.8rem;
+            color: var(--accent-blue);
+            margin-right: 0.5rem;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 2rem;
+        }
+
+        nav ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: var(--transition);
+            padding-bottom: 0.25rem;
+            position: relative;
+        }
+
+        nav ul li a:hover, nav ul li a.active {
+            color: var(--text-primary);
+        }
+
+        nav ul li a.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(to right, var(--accent-blue), var(--light-blue));
+            border-radius: 2px;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 6rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.1), transparent 60%);
+            z-index: -1;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--text-primary), var(--light-blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero-text p {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 90%;
+        }
+
+        .hero-text .highlight {
+            color: var(--light-blue);
+            font-weight: 600;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-blue), #2563EB);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-color: var(--accent-blue);
+        }
+
+        .hero-image {
+            position: relative;
+        }
+
+        .dashboard-preview {
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .dashboard-preview::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom right, rgba(59, 130, 246, 0.1), transparent);
+            pointer-events: none;
+        }
+
+        /* Getting Started Section */
+        .getting-started {
+            padding: 6rem 0;
+            background-color: var(--secondary-bg);
+            position: relative;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 4rem;
+        }
+
+        .section-header h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--text-primary), var(--light-blue));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .section-header p {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background-color: var(--tertiary-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .step-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--card-shadow);
+            border-color: var(--accent-blue);
+        }
+
+        .step-number {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--accent-blue), #2563EB);
+            color: white;
+            border-radius: 50%;
+            font-weight: 700;
+            font-size: 1.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .step-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+        }
+
+        .step-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Services Section */
+        .services {
+            padding: 6rem 0;
+            background-color: var(--primary-bg);
+            position: relative;
+        }
+
+        .services::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.1), transparent 60%);
+            z-index: 0;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .service-card {
+            background-color: var(--tertiary-bg);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.15);
+            border-color: var(--accent-blue);
+        }
+
+        .service-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.2));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .service-icon i {
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+        }
+
+        .service-card h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+        }
+
+        .service-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .learn-more {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            margin-top: auto;
+        }
+
+        .learn-more i {
+            margin-left: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .learn-more:hover {
+            color: var(--light-blue);
+        }
+
+        .learn-more:hover i {
+            transform: translateX(3px);
+        }
+
+        /* Terms Section */
+        .terms {
+            padding: 4rem 0;
+            background-color: var(--secondary-bg);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .terms-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: start;
+        }
+
+        .terms-section h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+        }
+
+        .terms-section p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .terms-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .terms-links a {
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .terms-links a i {
+            margin-right: 0.5rem;
+        }
+
+        .terms-links a:hover {
+            color: var(--light-blue);
+            text-decoration: underline;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--primary-bg);
+            border-top: 1px solid var(--border-color);
+            padding: 2rem 0;
+        }
+
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copyright {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--accent-blue);
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .social-links a {
+            color: var(--text-muted);
+            font-size: 1.25rem;
+            transition: var(--transition);
+        }
+
+        .social-links a:hover {
+            color: var(--accent-blue);
+        }
+
+        /* Media Queries */
+        @media (max-width: 992px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .hero-text h1 {
+                font-size: 2.5rem;
+            }
+
+            .terms-container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .footer-container {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+
+            .social-links {
+                justify-content: center;
+            }
+
+            .logo {
+                font-size: 1.25rem;
+            }
+
+            nav ul li {
+                margin-left: 1rem;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hero-text h1 {
+                font-size: 2rem;
+            }
+
+            .hero-text p {
+                font-size: 1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                justify-content: center;
+            }
+
+            nav ul li {
+                margin: 0 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container header-container">
+            <a href="#" class="logo">
+                <i class="fas fa-brain logo-icon"></i>
+                AIX<span>Fusion</span>
+            </a>
+            <nav>
+                <ul>
+                    <li><a href="#" class="active">Introduction</a></li>
+                    <li><a href="#getting-started">Getting Started</a></li>
+                    <li><a href="#services">AI Services</a></li>
+                    <li><a href="#terms">Terms & Privacy</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container hero-content">
+            <div class="hero-text">
+                <h1>Your One-Stop AI Service Hub</h1>
+                <p>Explore our intelligent, easy-to-use AI tools that empower you to automate complex tasks — <span class="highlight">no coding needed!</span></p>
+                <p>Our goal is to <span class="highlight">democratize artificial intelligence</span> by making advanced AI tools available to everyone — not just developers. Whether you're a student, content creator, researcher, or business user.</p>
+                <div class="hero-buttons">
+                    <a href="D:\AI_AGENT\FroentEnd\Home_page.html" class="btn btn-primary">Get Started <i class="fas fa-arrow-right" style="margin-left: 0.5rem;"></i></a>
+                    <a href="#" class="btn btn-secondary">Learn More</a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTS6yUz9KQh6AIAyAfAPi2QFLOLQzkHfburNA&s" alt="AIX Fusion Dashboard" class="dashboard-preview">
+            </div>
+        </div>
+    </section>
+
+    <!-- Getting Started Section -->
+    <section class="getting-started" id="getting-started">
+        <div class="container">
+            <div class="section-header">
+                <h2>Getting Started</h2>
+                <p>Begin your AI journey with AIX Fusion in just a few simple steps.</p>
+            </div>
+            <div class="steps">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h3>Create an Account</h3>
+                    <p>Simple sign-up with email or use your social login for quick access to all our AI services.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h3>Log In to AIX Fusion</h3>
+                    <p>Secure login to access your personalized dashboard with all available AI tools.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h3>Choose a Service</h3>
+                    <p>Navigate to the home page and select from our wide range of intelligent AI tools.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h3>Use the Service</h3>
+                    <p>Upload inputs or enter prompts to get instant, intelligent outputs from our AI engines.</p>
+                </div>
+             
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section class="services" id="services">
+        <div class="container">
+            <div class="section-header">
+                <h2>AI Services</h2>
+                <p>Discover our comprehensive suite of intelligent AI tools designed to enhance your productivity.</p>
+            </div>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-volume-up"></i>
+                    </div>
+                    <h3>Speech to Text</h3>
+                    <p>Convert spoken audio into accurate, readable text with support for multiple languages, accents, and real-time transcription.</p>
+                    <a href="D:\AI_AGENT\FroentEnd\Speech-To-Text.html" class="learn-more">Explore feature <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <h3>OCR (Image to Text)</h3>
+                    <p>Extract readable, editable text from uploaded images, screenshots, or scanned documents with high accuracy.</p>
+                    <a href="D:\AI_AGENT\FroentEnd\OCR.html" class="learn-more">Explore feature <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-image"></i>
+                    </div>
+                    <h3>Image Generation</h3>
+                    <p>Create stunning, original images based on detailed text prompts with our advanced AI image generator.</p>
+                    <a href="D:\AI_AGENT\FroentEnd\Image_Generation_UI.html" class="learn-more">Explore feature <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <h3>Video Generation</h3>
+                    <p>Generate short videos from text descriptions, ideal for creating engaging content for marketing and education.</p>
+                    <a href="D:\AI_AGENT\FroentEnd\Video_Generation.html" class="learn-more">Explore feature <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-compress-alt"></i>
+                    </div>
+                    <h3>Text Summarization</h3>
+                    <p>Condense long passages into concise key points without losing important information or context.</p>
+                    <a href="D:\AI_AGENT\FroentEnd\Text_Summarization.html" class="learn-more">Explore feature <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="service-card">
+                    <div class="service-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3>Web Search Agent</h3>
+                    <p>Smart search that pulls relevant content from the web and provides organized, summarized results.</p>
+                    <a href="D:\AI_AGENT\FroentEnd\Web_Search.html" class="learn-more">Explore feature <i class="fas fa-chevron-right"></i></a>
+                </div>
+              
+            </div>
+        </div>
+    </section>
+
+    <!-- Terms Section -->
+    <section class="terms" id="terms">
+        <div class="container terms-container">
+            <div class="terms-section">
+                <h3>Terms & Conditions</h3>
+                <p>At AIX Fusion, we're committed to transparency and ethical AI usage. Our comprehensive terms outline how our services can be used while respecting intellectual property rights and ethical boundaries.</p>
+                <div class="terms-links">
+                    <a href="#"><i class="fas fa-file-contract"></i> Terms of Service</a>
+                    <a href="#"><i class="fas fa-shield-alt"></i> Privacy Policy</a>
+                </div>
+            </div>
+            <div class="terms-section">
+                <h3>Data Protection</h3>
+                <p>Your data privacy is our priority. We employ industry-leading security measures to protect your information and AI-generated content. Learn how we safeguard your data while providing powerful AI capabilities.</p>
+                <p>AIX Fusion maintains strict ethical guidelines for AI-generated content and ensures responsible usage of our technology.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container footer-container">
+            <div class="copyright">
+                &copy; 2025 AIX Fusion. All rights reserved.
+            </div>
+            <div class="footer-links">
+                <a href="#">Home</a>
+                <a href="#">Contact Support</a>
+                <a href="#">About Us</a>
+            </div>
+            <div class="social-links">
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

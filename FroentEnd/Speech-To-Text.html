@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AIX Fusion Speech-to-Text</title>
+    <style>
+        :root {
+            --dark-bg: #0A1018;
+            --darker-bg: #111827;
+            --border-color: #1A2234;
+            --text-color: #C9D1D9;
+            --heading-color: #F0F6FC;
+            --primary-color: #2188FF;
+            --secondary-color: #3FB950;
+            --hover-color: #1F6FEB;
+            --danger-color: #F85149;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            width: 100%;
+            background-color: var(--darker-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            letter-spacing: 1px;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 800px;
+            background-color: var(--darker-bg);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        h1 {
+            color: var(--heading-color);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .tab {
+            padding: 0.75rem 1.5rem;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            color: var(--text-color);
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .tab.active {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .record-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .record-button {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .record-button:hover {
+            background-color: var(--hover-color);
+            transform: scale(1.05);
+        }
+        
+        .record-button.recording {
+            background-color: var(--danger-color);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .record-icon {
+            width: 32px;
+            height: 32px;
+            fill: white;
+        }
+        
+        .record-status {
+            font-size: 1rem;
+            color: var(--text-color);
+            text-align: center;
+        }
+        
+        .timer {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--heading-color);
+        }
+        
+        .upload-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+        
+        .upload-area {
+            width: 100%;
+            border: 2px dashed var(--border-color);
+            border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background-color: rgba(33, 136, 255, 0.05);
+        }
+        
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            fill: var(--text-color);
+            margin-bottom: 1rem;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .button:hover {
+            background-color: var(--hover-color);
+        }
+        
+        .button:disabled {
+            background-color: var(--border-color);
+            cursor: not-allowed;
+        }
+        
+        .result-container {
+            margin-top: 2rem;
+            display: none;
+        }
+        
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .copy-btn {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-btn:hover {
+            background-color: rgba(240, 246, 252, 0.1);
+        }
+        
+        .copy-icon {
+            width: 16px;
+            height: 16px;
+            fill: var(--text-color);
+        }
+        
+        .transcription {
+            background-color: var(--dark-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1rem;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+        
+        .loading {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid var(--primary-color);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: var(--danger-color);
+            text-align: center;
+            margin: 1rem 0;
+            display: none;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 1.5rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                border-bottom: none;
+            }
+            
+            .tab {
+                border-bottom: 1px solid var(--border-color);
+            }
+            
+            .tab.active {
+                background-color: rgba(33, 136, 255, 0.1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">AIX Fusion</div>
+    </header>
+    
+    <div class="container">
+        <h1>Speech-to-Text Converter</h1>
+        
+        <div class="tabs">
+            <button class="tab active" data-tab="record">Record Audio</button>
+            <button class="tab" data-tab="upload">Upload Audio</button>
+        </div>
+        
+        <div class="tab-content active" id="record-tab">
+            <div class="record-container">
+                <button class="record-button" id="record-btn">
+                    <svg class="record-icon" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="6"></circle>
+                    </svg>
+                </button>
+                <div class="record-status">Press the button to start recording</div>
+                <div class="timer" id="timer">00:00</div>
+                <button class="button" id="convert-record-btn" disabled>Convert to Text</button>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="upload-tab">
+            <div class="upload-container">
+                <div class="upload-area" id="upload-area">
+                    <svg class="upload-icon" viewBox="0 0 24 24">
+                        <path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96zM14 13v4h-4v-4H7l5-5 5 5h-3z"></path>
+                    </svg>
+                    <p>Drag and drop your audio file here</p>
+                    <p>or</p>
+                    <button class="button" id="browse-btn">Browse Files</button>
+                    <p class="small">Supported formats: MP3, WAV, M4A, FLAC</p>
+                </div>
+                <input type="file" class="file-input" id="file-input" accept=".mp3,.wav,.m4a,.flac">
+                <button class="button" id="convert-upload-btn" disabled>Convert to Text</button>
+            </div>
+        </div>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing your audio...</p>
+        </div>
+        
+        <div class="error-message" id="error-message"></div>
+        
+        <div class="result-container" id="result-container">
+            <div class="result-header">
+                <h3>Transcription Result</h3>
+                <button class="copy-btn" id="copy-btn">
+                    <svg class="copy-icon" viewBox="0 0 24 24">
+                        <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path>
+                    </svg>
+                    Copy
+                </button>
+            </div>
+            <div class="transcription" id="transcription"></div>
+        </div>
+    </div>
+    
+    <script>
+        // API Endpoint
+        const API_ENDPOINT = "http://127.0.0.1:5000/speech-to-text/";
+        
+        // DOM Elements
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const recordBtn = document.getElementById('record-btn');
+        const recordStatus = document.querySelector('.record-status');
+        const timer = document.getElementById('timer');
+        const convertRecordBtn = document.getElementById('convert-record-btn');
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const browseBtn = document.getElementById('browse-btn');
+        const convertUploadBtn = document.getElementById('convert-upload-btn');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+        const resultContainer = document.getElementById('result-container');
+        const transcription = document.getElementById('transcription');
+        const copyBtn = document.getElementById('copy-btn');
+        
+        // Tab functionality
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(tc => tc.classList.remove('active'));
+                
+                tab.classList.add('active');
+                const tabId = `${tab.dataset.tab}-tab`;
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // Recording functionality
+        let mediaRecorder;
+        let audioChunks = [];
+        let recordingStartTime;
+        let timerInterval;
+        let recordedBlob;
+        
+        recordBtn.addEventListener('click', () => {
+            if (recordBtn.classList.contains('recording')) {
+                stopRecording();
+            } else {
+                startRecording();
+            }
+        });
+        
+        async function startRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+                
+                mediaRecorder.onstop = () => {
+                    recordedBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                    convertRecordBtn.disabled = false;
+                };
+                
+                audioChunks = [];
+                mediaRecorder.start();
+                recordBtn.classList.add('recording');
+                recordStatus.textContent = 'Recording... Click to stop';
+                
+                recordingStartTime = Date.now();
+                timerInterval = setInterval(updateTimer, 1000);
+                
+            } catch (error) {
+                showError('Microphone access denied. Please allow microphone access and try again.');
+                console.error('Error accessing microphone:', error);
+            }
+        }
+        
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                
+                recordBtn.classList.remove('recording');
+                recordStatus.textContent = 'Recording complete. Click to record again.';
+                clearInterval(timerInterval);
+            }
+        }
+        
+        function updateTimer() {
+            const elapsed = Math.floor((Date.now() - recordingStartTime) / 1000);
+            const minutes = Math.floor(elapsed / 60).toString().padStart(2, '0');
+            const seconds = (elapsed % 60).toString().padStart(2, '0');
+            timer.textContent = `${minutes}:${seconds}`;
+        }
+        
+        // File upload functionality
+        let uploadedFile;
+        
+        browseBtn.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (event) => {
+            if (event.target.files.length > 0) {
+                handleFileUpload(event.target.files[0]);
+            }
+        });
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            if (e.dataTransfer.files.length > 0) {
+                handleFileUpload(e.dataTransfer.files[0]);
+            }
+        });
+        
+        function handleFileUpload(file) {
+            const validTypes = ['audio/mp3', 'audio/wav', 'audio/x-m4a', 'audio/flac', 'audio/mpeg'];
+            
+            if (!validTypes.includes(file.type) && 
+                !file.name.endsWith('.mp3') && 
+                !file.name.endsWith('.wav') && 
+                !file.name.endsWith('.m4a') && 
+                !file.name.endsWith('.flac')) {
+                showError('Please upload a valid audio file (MP3, WAV, M4A, or FLAC)');
+                return;
+            }
+            
+            uploadedFile = file;
+            uploadArea.innerHTML = `
+                <svg class="upload-icon" viewBox="0 0 24 24">
+                    <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"></path>
+                </svg>
+                <p>${file.name}</p>
+                <p>${(file.size / (1024 * 1024)).toFixed(2)} MB</p>
+            `;
+            
+            convertUploadBtn.disabled = false;
+        }
+        
+        // Convert functionality
+        convertRecordBtn.addEventListener('click', () => {
+            if (recordedBlob) {
+                processAudio(recordedBlob, 'recorded-audio.webm');
+            } else {
+                showError('No recording found. Please record audio first.');
+            }
+        });
+        
+        convertUploadBtn.addEventListener('click', () => {
+            if (uploadedFile) {
+                processAudio(uploadedFile, uploadedFile.name);
+            } else {
+                showError('No file uploaded. Please upload an audio file first.');
+            }
+        });
+        
+        async function processAudio(audioBlob, filename) {
+            // Hide results and errors, show loading
+            resultContainer.style.display = 'none';
+            errorMessage.style.display = 'none';
+            loading.style.display = 'flex';
+            
+            // Create FormData to send to API
+            const formData = new FormData();
+            formData.append('file', audioBlob, filename);
+            
+            try {
+                // Send the audio to the FastAPI endpoint
+                const response = await fetch(API_ENDPOINT, {
+                    method: 'POST',
+                    body: formData,
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server responded with status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                // Display result (adjust based on actual API response structure)
+                transcription.textContent = data.text || "No transcription found in response.";
+                resultContainer.style.display = 'block';
+                
+            } catch (error) {
+                showError(`Error processing audio: ${error.message}`);
+                console.error('Processing error:', error);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+        
+        // Copy functionality
+        copyBtn.addEventListener('click', () => {
+            const text = transcription.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                copyBtn.innerHTML = `
+                    <svg class="copy-icon" viewBox="0 0 24 24">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"></path>
+                    </svg>
+                    Copied!
+                `;
+                
+                setTimeout(() => {
+                    copyBtn.innerHTML = `
+                        <svg class="copy-icon" viewBox="0 0 24 24">
+                            <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z"></path>
+                        </svg>
+                        Copy
+                    `;
+                }, 2000);
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        });
+        
+        // Helper functions
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            loading.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
