@@ -30,7 +30,7 @@ Each AI agent is a standalone service with its own endpoint and UI, and the syst
 
 ## 🖼️ Landing Page Preview
 
-### 🔐 Login Page
+### 🔐 Landing Page
 ![Landing Page](Resources/image.png)
 
 
