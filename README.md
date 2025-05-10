@@ -18,7 +18,7 @@ AIX Fusion is powered by:
 - **FastAPI** for building microservice APIs.
 - **LangChain** to manage multi-agent workflows and LLM orchestration.
 - **Groq API + Meta LLaMA 3** for high-performance inference.
-- **Streamlit** for a clean and interactive frontend UI.
+
 
 Each AI agent is a standalone service with its own endpoint and UI, and the system intelligently routes user requests to the appropriate service.
 
@@ -27,6 +27,14 @@ Each AI agent is a standalone service with its own endpoint and UI, and the syst
 - **Backend:** Python, FastAPI, LangChain, Groq Inference, OpenAI Whisper
 - **Frontend:** HTML, Tailwind CSS.
 - **Utilities:** Playwright (for web scraping), AutoScraper (optional), SerpAPI
+
+## 🖼️ Landing Page Preview
+
+### 🔐 Login Page
+![Landing Page](Resources/image.png)
+
+
+
 
 
 
